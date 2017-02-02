@@ -1,5 +1,5 @@
 # atom
-An experimental VM for a hypothetical OOP language.
+An experimental (incomplete) VM for a hypothetical OOP language.
 
 No, classes.
 
