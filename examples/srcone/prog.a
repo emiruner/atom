@@ -1,0 +1,85 @@
+"""Find and display line, word, and byte counts."""
+
+need Filesystem.
+need BooleanObjects.
+need Console.
+
+true -> BooleanObjects :trueObject.
+false -> BooleanObjects :falseObject.
+stdout -> Console :stdout.
+
+findCountsInStream -> {
+    input | ch inWord |
+
+    inWord := false.
+
+    {
+        (ch := input :nextByte) <> -1
+    }
+    (:whileTrue, {
+        ch :isSpace (:then, {
+            inWord (:then, {
+                countsHolder :incrWords.
+                inWord := false.
+            }).
+
+            ch :isNewline (:or, {ch :isCarriageReturn}) (:then, {
+                countsHolder :incrLines.
+            })
+        }, :else, {
+            inWord := true
+        })
+
+        countsHolder :incrBytes
+    }).
+
+    countsHolder
+}.
+
+findCounts -> {
+    filename | counts |
+
+    counts := Filesystem (:withFile, filename, { input | findCountsInStream input }).
+
+    stdout (:println, 'Number of lines: ' + counts :lines :asString).
+    stdout (:println, 'Number of words: ' + counts :words :asString).
+    stdout (:println, 'Number of bytes: ' + counts :bytes :asString).
+}.
+
+------------------
+
+countsHolder -> (
+    basicObjectWithoutDelegation,
+
+    (:field, :public, :lines, 0),
+    (:field, :public, :words, 0),
+    (:field, :public, :bytes, 0),
+    
+    (:method, :incrLines, { self (:lines, self :lines + 1) }),
+    (:method, :incrWords, { self (:words, self :words + 1) }),
+    (:method, :incrBytes, { self (:bytes, self :bytes + 1) })
+).        
+
+------------------
+
+countsHolderTraits -> (
+    (:method, :incrLines, { self (:lines, self :lines + 1) }),
+    (:method, :incrWords, { self (:words, self :words + 1) }),
+    (:method, :incrBytes, { self (:bytes, self :bytes + 1) })
+).
+
+countsFieldDefs -> (
+    (:field, :public, :lines, 0),
+    (:field, :public, :words, 0),
+    (:field, :public, :bytes, 0)
+).
+    
+countsHolder -> (
+    basicObject,
+    (:parent, :traits, countsHolderTraits),
+    (:fieldDefinitions, countsFieldDefs),
+    (:fields, (:lines, 0), (:words, 0), (:bytes, 0))
+).        
+
+------------------
+

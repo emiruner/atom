@@ -1,0 +1,89 @@
+def console = loader (:moduleRequires, ('implement-interface', 'system-console'));
+def booleanObjects = loader (:moduleRequires, 'standard-boolean-objects');
+def filesystem = loader (:moduleRequires, ('implement-interface', 'filesystem-0xFFAA'));
+
+def true = booleanObjects :trueObject;
+def false = booleanObjects :falseObject;
+def stdout = console :stdout;
+
+def fact = n => {
+    n == 0 :then { 1 } :else { fact (n - 1) * n }
+}
+
+def abs = num => {
+    num < 0 :then { -1 * num } :else { num }
+}
+
+def signum = num => {
+    num < 0 :then { -1 } :elsif { num == 0 } { 0 } :else { 1 }
+}
+
+def max = xs => {
+    var m = xs :first;
+
+    xs :do x => { x > m :then m = x };
+    m
+}
+
+def meanValue = (a, b) => {
+    a + b / 2
+};
+
+meanValue :call 56 78;
+meanValue $ (67, 104)
+
+method (:meanValue a b => {
+    a + b / 2
+});
+
+method (:meanValue, a, b) => {
+    a + b / 2
+};
+
+def findCountsInStream = input => {
+    var ch
+    var inWord = false
+    def counts = countsHolder clone
+
+    { (ch = input nextByte) <> -1 } whileTrue {
+        ch isSpace then
+        {
+            inWord then {
+                counts incrWords
+                inWord = false
+            }
+            
+            ch isNewline or {ch isCarriageReturn} then {
+                counts incrLines
+            }
+        } else {
+            inWord = true
+        }
+        
+        counts incrBytes
+    }
+    
+    counts
+}
+
+def findCounts = filename => {
+    def counts = Filesystem (withFile, filename, do, input => {findCountsInStream:$ input})
+
+    stdout (println, 'Number of lines: ', counts lines)
+    stdout (println, 'Number of words: ', counts words)
+    stdout (println, 'Number of bytes: ', counts bytes)
+}
+
+def countsHolder = stdobject {
+    field lines;
+    field words;
+    field bytes;
+    
+    method (:incrCount, fieldName) => {        
+        self fieldName (self fieldName + 1);
+    }
+
+    method :incrLines => { self incrCount lines }
+    method :incrWords => { self incrCount words }
+    method :incrBytes => { self incrCount bytes }
+}

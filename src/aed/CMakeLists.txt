@@ -1,0 +1,11 @@
+FIND_PACKAGE(Qt4 REQUIRED)
+INCLUDE(${QT_USE_FILE})
+
+FILE(GLOB aedSources Main.cpp MainWindow.cpp ObjectModel.cpp ObjectNode.cpp)
+QT4_AUTOMOC(${aedSources})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+LINK_LIBRARIES(${QT_LIBRARIES})
+LINK_LIBRARIES(atomvm)
+
+ADD_EXECUTABLE(aed ${aedSources})

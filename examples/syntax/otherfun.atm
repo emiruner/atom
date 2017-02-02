@@ -1,0 +1,62 @@
+def eqInt
+def addInt
+def cstreq
+def print
+def println
+def isObjectArray
+def readByte
+
+def main = (memoryHandle, memoryControllerFn, printStringFn, loadLibraryFn, resolveFunctionFn) #{
+    def fn = functions :wire (:loadLibraryFn, loadLibraryFn)
+
+    installExceptionHandler mainExHandler
+
+    sharedLibraryMo[2] = resolveFunctionFn
+    createSharedLibrary[2] = loadLibraryFn
+
+    def primsLib = createSharedLibrary "libatomprims.so" 
+
+    primsLib :fn_is_object_array
+    println[1]  = primsLib :fn_println
+    print[1]    = primsLib :fn_print
+    eqInt[1]    = primsLib :fn_eqInt
+    addInt[1]   = primsLib :fn_addInt
+    cstreq[1]   = primsLib :cstreq
+    readByte[1] = primsLib :fn_readByte
+
+    countWords ()
+    counter :dumpCounts
+}
+
+def fnCallerMo = (zero, realTarget, realMsg) #{
+    ^ (realTarget[1] realMsg)
+}
+
+def eqInt = fnCallerMo#(0)
+def addInt = fnCallerMo#(0)
+def cstreq = fnCallerMo#(0)
+def print = fnCallerMo#(0)
+def println = fnCallerMo#(0)
+def isObjectArray = fnCallerMo#(0)
+def readByte = fnCallerMo#(0)
+
+def createSharedLibrary = libraryName#{
+    def handle = loadLibraryFn libraryName
+
+    if1 handle ! "error while loading library"
+    ^ sharedLibraryMo#(result)
+}
+
+def mod = xxxx :wire ('addInt', addIntFn)
+
+mod :addOne 5
+
+module xxxx 
+{
+	require addInt
+
+	def addOne = x#{
+		^ addInt (x, 1)
+	}
+}
+	

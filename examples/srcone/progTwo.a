@@ -1,0 +1,26 @@
+def foo = object {
+    field position, collection;
+
+    method (:upTo, anObject) => {
+        def start = self position + 1
+        def end = self collection (indexOf, anObject, startingAt, start, ifAbsent, 0)
+
+        (end == 0 or {end > (self readLimit)}) then {^self uptoEnd};
+
+        self (moveTo, end)
+
+        ^ self collection (copyFrom, start, to, end - 1)
+    }
+
+    method x => {
+        123
+    }
+
+    method (:fact, 0) => {
+        1
+    }
+
+    method (:fact, n) => {
+        self (fact, n - 1)
+    }
+}

@@ -1,0 +1,17 @@
+module {
+    need console
+    need integers
+
+    def main = args => {
+        args :size <> 2 :then {
+            console :println "must give two numbers as command line arguments"
+        } :else {
+            def first = integers :parse (args (:at, 0))
+            def second = integers :parse (args (:at, 1))
+
+            console :println (first + second :displayStr)
+        }
+    }
+}
+
+main $ ("123", "456")

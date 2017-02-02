@@ -1,0 +1,11 @@
+arun implements a very simple startup protocol. It accepts an object store file and object index,
+prepares an object array containing the following elements:
+
+ * a reference to memory (its kind is bytearray but it is a pointer to the C++ Memory class instance)
+ * memoryControllerFn native function
+ * printCString native function
+ * loadLibrary native function
+ * resolveFunction native function
+
+Then it loads the given object store, sends this array as message to the given object specified by
+object index.

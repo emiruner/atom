@@ -1,0 +1,11 @@
+main: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+
+    !var printCString
+
+    !aat msg 2 > printCString
+    !sendwcc "Hello, World!" !to printCString
+    !cont cont
+}

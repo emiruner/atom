@@ -1,0 +1,97 @@
+.... inside boolean true value ....
+
+method ("then", trueBlock, "else", elseBlock) => {
+    trueBlock value
+}
+
+method "then" => {
+    trueBlock => {
+        trueBlock value
+
+        else => {
+            // check that else is really "else"
+            falseBlock => {
+                // Do nothing.
+            }
+        }
+    }
+}
+
+.... inside boolean false value ....
+
+method "then" => {
+     trueBlock => {
+         // Do not execute true block.
+
+        else => {
+            // check that else is really "else"
+
+            falseBlock => {
+                falseBlock value
+            }
+        }
+    }
+}
+
+method ("then", trueBlock, "else", elseBlock) => {
+    falseBlock value
+}
+
+
+
+... inside block class ...
+
+method "whileTrue" => {
+    workBlock => {        
+        start:
+            self value not then { ^self }
+            workBlock value
+            jump start
+    }
+}
+
+.... inside number class ....
+
+method "to" => {
+    endValue => {
+        range (from, self, to, endValue)
+    }
+}
+
+
+........... inside collection class ............
+
+method "do" => {
+    doBlock => {
+        var idx = 0
+        var len = self store length
+
+        { idx != len } whileTrue {
+            doBlock (value, self store (at, idx))
+            idx = idx + 1
+        }
+    }
+}
+
+someValue then { fooo } else { booo }   
+
+3 to 5 step 7 do {
+}
+
+
+
+
+
+... inside integer ...
+
+method "to" => {
+    targetValue => {
+        "step" => {
+            stepValue => {
+                steppingStone (from, self, to, targetValue, step, stepValue)
+            }
+        }
+    }
+}
+
+

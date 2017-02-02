@@ -1,0 +1,60 @@
+def main = (memoryHandle, memoryControllerFn, printStringFn, loadLibraryFn, resolveFunctionFn) #{
+    def sharedLibraryMo = (zero, lib, symbolName) #{
+        def fn = resolveFunctionFn (lib, symbolName)
+
+        if1 fn ! "cannot resolve function"
+        ^ fn
+    }
+
+    def createSharedLibrary = libraryName #{
+        def handle = loadLibraryFn libraryName
+
+        if1 handle ! "error while loading library"
+        
+        ^ sharedLibraryMo#(handle)
+    }
+
+    
+    installExceptionHandler mainExHandler
+
+    
+}
+
+
+the original assembler code builds the runtime objects by patching
+already created objects..
+
+another approach is to create a module object and send a message
+to module object to wire its contents etc.
+
+def wordcount = module {
+    need loadLibrary "loadLibrary"
+    need resolveFunction "resolveFunction"
+   
+    def sharedLibraryMo = (zero, lib, symbolName) #{
+        def fn = resolveFunction (lib, symbolName)
+
+        if1 fn ! "cannot resolve function"
+        ^ fn
+    }
+
+    def createSharedLibrary = libraryName #{
+        def handle = loadLibrary libraryName
+
+        if1 handle ! "error while loading library"
+        
+        ^ sharedLibraryMo#(handle)
+    }
+}
+
+def main = (memoryHandle, memoryControllerFn, printStringFn, loadLibraryFn, resolveFunctionFn) #{
+    def wc = wordcount :wire ("loadLibrary", loadLibraryFn, "resolveFunction", resolveFunctionFn)
+
+    def lib = wc :createSharedLibrary "libatomprims.so"
+    def addInt = lib "fn_addInt"
+  
+
+    printStringFn (addInt 999)
+    
+}
+

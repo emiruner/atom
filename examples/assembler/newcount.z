@@ -1,0 +1,297 @@
+main: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var memoryControllerFn
+    !var printStringFn
+    !var loadLibraryFn
+    !var resolveFunctionFn
+    !var memoryHandle
+    !var primsLib
+    !var foo
+    
+    !aat msg 0 > memoryHandle
+    !aat msg 1 > memoryControllerFn
+    !aat msg 2 > printStringFn
+    !aat msg 3 > loadLibraryFn
+    !aat msg 4 > resolveFunctionFn
+        
+    !iexh mainExHandler
+
+    !aput *sharedLibraryMo 2 resolveFunctionFn
+    !aput *createSharedLibrary 2 loadLibraryFn
+
+    !send "libatomprims.so" !to createSharedLibrary > primsLib
+
+    !send "fn_is_object_array" !to primsLib > tmp
+    !aput *isObjectArray 1 tmp
+
+    !send "fn_println" !to primsLib > tmp
+    !aput *println 1 tmp
+
+    !send "fn_print" !to primsLib > tmp
+    !aput *print 1 tmp
+
+    !send "fn_eqInt" !to primsLib > tmp
+    !aput *eqInt 1 tmp
+
+    !send "fn_addInt" !to primsLib > tmp
+    !aput *addInt 1 tmp
+
+    !send "fn_cstreq" !to primsLib > tmp
+    !aput *cstreq 1 tmp
+
+    !send "fn_readByte" !to primsLib > tmp
+    !aput *readByte 1 tmp
+
+    !send 0 !to countWords > tmp
+    !send "dumpCounts" !to counter
+}
+
+fnCallerMo: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var realTarget
+    !var realMsg
+    !var fn
+
+    !aat msg 1 > realTarget
+    !aat msg 2 > realMsg
+    !aat realTarget 1 > fn
+    !send realMsg !to fn > tmp
+    !retres tmp
+}
+
+eqInt: !object {fnCallerMo, 0} 
+addInt: !object {fnCallerMo, 0} 
+cstreq: !object {fnCallerMo, 0} 
+print: !object {fnCallerMo, 0} 
+println: !object {fnCallerMo, 0} 
+isObjectArray: !object {fnCallerMo, 0} 
+readByte: !object {fnCallerMo, 0} 
+
+mainExHandler: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+
+    !send msg !to isObjectArray > tmp
+    !ifnot1 tmp !send "message does not conform to exception protocol. do nothing" !to println
+    !ifnot1 tmp !retres 0
+
+    !aat msg 0 > tmp
+    !croa ["processException", tmp] > tmp
+    !send tmp !to cstreq > tmp
+    !ifnot1 tmp !send "message is an object array but first element is not processException" !to println
+    !ifnot1 tmp !retres 0
+
+    !send "an exception occured, exception: " !to println
+    !aat msg 1 > tmp
+    !send tmp !to println
+}
+
+createSharedLibrary: !simplefn
+{
+    !var:0 libraryName
+    !var:1 tmp
+    !var:2 loadLibrary
+ 
+    !send libraryName !to loadLibrary > tmp    
+    !if1 tmp !raise "error while loading library"
+
+    !cro [sharedLibraryMo, tmp] > tmp
+    !retres tmp
+}
+
+sharedLibraryMo: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var:2 resolveFunction
+    !var realTarget
+    !var realMsg
+    !var libraryHandle
+
+    !aat msg 1 > realTarget
+    !aat msg 2 > realMsg
+
+    !aat realTarget 1 > libraryHandle
+
+    !croa [libraryHandle, realMsg] > tmp
+    !send tmp !to resolveFunction > tmp
+    !if1 tmp !raise "cannot resolve function"
+    !retres tmp
+}
+
+isIntegerInSet: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var needle
+    !var haystack
+    !var index
+    !var setLength
+
+    !aat msg 0 > needle
+    !aat msg 1 > haystack
+    !set index 0
+    !alen haystack > setLength
+
+loop:
+    !croa [index, setLength] > tmp
+    !send tmp !to eqInt > tmp
+    !if1 tmp !retres 0
+
+    !aat haystack index > tmp
+    !croa [needle, tmp] > tmp
+    !send tmp !to eqInt > tmp
+    !if1 tmp !retres 1
+    
+    !send index !to addOne > index
+    !jmp loop       
+}
+
+spaceChars: !objarr {8, 10, 13, 32}
+
+isSpace: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+
+    !croa [msg, spaceChars] > tmp
+    !send tmp !to isIntegerInSet > tmp
+
+    !retres tmp
+}
+
+newlineChars: !objarr {10, 13}
+
+isNewline: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+
+    !croa [msg, newlineChars] > tmp
+    !send tmp !to isIntegerInSet > tmp
+
+    !retres tmp
+}
+
+addOne: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+
+    !croa [1, msg] > tmp
+    !send tmp !to addInt > tmp
+
+    !retres tmp
+}
+
+counter: !object
+{
+    counterMo,
+    0, // chars
+    0, // words
+    0  // lines
+}
+
+counterMo: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var target
+
+    !aat msg 1 > target
+    !aat msg 2 > msg
+ 
+    !croa ["incrChars", msg] > tmp
+    !send tmp !to cstreq > tmp
+    !if1 tmp !jmp incrChars
+
+    !croa ["incrWords", msg] > tmp
+    !send tmp !to cstreq > tmp
+    !if1 tmp !jmp incrWords
+
+    !croa ["incrLines", msg] > tmp
+    !send tmp !to cstreq > tmp
+    !if1 tmp !jmp incrLines
+
+    !croa ["dumpCounts", msg] > tmp
+    !send tmp !to cstreq > tmp
+    !if1 tmp !jmp dumpCounts
+
+    !raise "unexpected message"
+
+incrChars:
+    !aat target 1 > tmp
+    !send tmp !to addOne > tmp
+    !aput target 1 tmp
+    !retres 0
+
+incrWords:
+    !aat target 2 > tmp
+    !send tmp !to addOne > tmp
+    !aput target 2 tmp
+    !retres 0
+
+incrLines:
+    !aat target 3 > tmp
+    !send tmp !to addOne > tmp
+    !aput target 3 tmp
+    !retres 0
+
+dumpCounts:
+    !send target !to dumpCounts
+    !retres 0
+}
+
+dumpCounts: !simplefn
+{
+    !var:0 counts
+    !var:1 tmp
+
+    !aat counts 3 > tmp
+    !send tmp !to print
+    !send " " !to print
+
+    !aat counts 2 > tmp
+    !send tmp !to print
+    !send " " !to print
+
+    !aat counts 1 > tmp
+    !send tmp !to print
+    !send " " !to println
+}
+
+countWords: !simplefn
+{
+    !var:0 msg
+    !var:1 tmp
+    !var ch
+    !var inWord
+
+readNextChar:
+    !send 0 !to readByte > ch
+
+    !croa [-1, ch] > tmp
+    !send tmp !to eqInt > tmp
+    !if1 tmp !jmp returnResult
+
+    !send "incrChars" !to counter 
+
+    !send ch !to isSpace > tmp
+    !ifnot1 tmp !set inWord 1
+    !ifnot1 tmp !jmp readNextChar
+
+    !send ch !to isNewline > tmp   
+    !if1 tmp !send "incrLines" !to counter
+      
+    !if1 inWord !send "incrWords" !to counter
+    !if1 inWord !set inWord 0
+    !jmp readNextChar
+
+returnResult:
+    !retres 0
+}

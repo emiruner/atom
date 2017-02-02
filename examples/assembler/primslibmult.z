@@ -1,0 +1,95 @@
+preload: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+
+    !var printCString
+    !var loadLib
+    !var resolveFun
+
+    !var primsLib
+    !var tmp
+
+    !aat msg 2 > printCString
+    !aat msg 3 > loadLib
+    !aat msg 4 > resolveFun
+
+    !sendwcc "libatomprims.so" !to loadLib > primsLib
+    !if1 primsLib !sendwcc "Cannot load prims library." !to printCString
+    !if1 primsLib !cont cont
+
+    !croa [primsLib, resolveFun] > tmp
+    !sendwcc tmp !to rawlibtoencapsulated > primsLib
+
+    !sendwcc primsLib !to main
+    !cont cont
+}
+
+main: !simplefn
+{
+    !var:0 cont
+    !var:1 primsLib
+    !var tmp
+    !var x
+    !var y
+
+    !croa ["fn_readInt", 1] > tmp
+    !sendwcc tmp !to primsLib > x
+
+    !croa ["fn_readInt", 1] > tmp
+    !sendwcc tmp !to primsLib > y
+
+    !croa [x, y] > tmp
+    !croa ["fn_multInt", tmp] > tmp
+    !sendwcc tmp !to primsLib > x
+
+    !croa ["fn_println", x] > tmp
+    !sendwcc tmp !to primsLib
+
+    !cont cont
+}
+
+rawlibtoencapsulated: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+    !var libref
+    !var resolvefn
+    !var tmp
+
+    !aat msg 0 > libref
+    !aat msg 1 > resolvefn
+
+    !croa [primslibmo, libref, resolvefn] > tmp
+    !contwith cont tmp
+}
+
+primslibmo: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+
+    !var target
+    !var realmsg
+    !var tmp
+    !var fnname
+    !var innermsg
+    !var libref
+    !var resolvefn
+    !var fn
+
+    !aat msg 1 > cont
+    !aat msg 2 > target
+    !aat msg 3 > realmsg
+
+    !aat realmsg 0 > fnname
+    !aat realmsg 1 > innermsg
+
+    !aat target 1 > libref
+    !aat target 2 > resolvefn
+
+    !croa [libref, fnname] > tmp
+    !sendwcc tmp !to resolvefn > fn
+    !sendwcc innermsg !to fn > tmp
+    !contwith cont tmp
+}

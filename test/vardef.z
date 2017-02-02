@@ -1,0 +1,25 @@
+fn2: !simplefn
+{
+    !var:0 cont 
+    !var:1 msg
+    !var:2 length = 123
+    !var:5 pi = pi
+    !var:8 test = 12.34
+    !var hello
+    !var foobar
+    !var something = !object {pi, "baz"}
+    
+    !send pi !to "foo"
+    !halt
+    !alen msg > foobar
+    !aat msg 5 > something    
+    !croa [fn2, 37, cont, !object {678  }] > hello
+    !sendwcc hello !to length
+    !aput msg length pi
+    !if1 msg !send pi !to pi
+    !ifnot1 msg !send pi !to pi
+    !cont cont       
+    !contwith cont foobar       
+}
+
+pi: 3.14

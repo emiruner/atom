@@ -1,0 +1,377 @@
+method :apply => rule => {
+    var memoRec = self :input (:memo, rule);
+
+    memoRec == (self :nullMemo) :then {
+        def origPos = self :input;
+        def failer = Failer :clone;
+                
+        origPos (:memo, rule, failer);
+        memoRec = origPos (:memo, rule, MemoEntry (:clone, self rule, self :input));
+
+        failer :isUsed :then {
+            def lastPos = self :input;
+
+            {
+                {
+                    self (:input, origPos);
+                    def answer = self rule;
+
+                    self :input == lastPos . :then {
+                        break;
+                    }
+
+                    memoRec :set :answer answer;
+                    memoRec :set :nextPos (self :input);
+                
+                    memoRec (:answer, answer);
+                    memoRec (:nextPos, self :input);
+                } 
+                :on isFailer
+                :do { break; }
+            }
+        } :elif { memoRec == Failer } {
+            memoRec :use;
+            ! ParseFailure
+        };
+
+        self (:input, memoRec :nextPos);
+        ^ memoRec :answer;
+    }
+}
+
+method :applyWithArgs => rule => params => {
+    params :reverse :do param => {
+        self :prependInput param
+    };
+
+    ^ self rule
+};
+
+method :applyWithPred => rule => pred => {
+    def answer = self :apply rule;
+
+    pred :eval answer :then {
+        ^ answer
+    };
+
+    ! self :failer
+}
+
+
+method :many => ruleNameOrFn => {  
+    ruleNameOrFn :isString :then {
+        ^ self (:many, { self (:apply, ruleName) })
+    } else {
+        def result = ArrayList :clone;
+
+        {
+            def lastPos = self :input;
+
+            {
+                result (:add, (fn :call))
+            } on: isFailer :do {
+                self (:input lastPos);
+                break;
+            };
+        } :loop;
+
+        ^ result
+    }
+};
+
+def many1 = fn => {
+    def result = ArrayList :clone;
+
+    result (:add, fn :call) 
+    result (:addAll, self (:many, fn));
+
+    result
+};
+
+method :manyOne => fn => {
+    def result = ArrayList :clone;
+
+    result (:add, fn :call);
+    result (:addAll, self :many fn);
+
+    result
+};
+
+def isFailer = ex => {
+    ex == self :failer
+};
+
+a => 'x' => 0 => {
+    a + c
+}
+
+method (:at, idx) => {
+    me(idx)
+};
+
+method (:at, idx, :put, val) => {
+    me(idx) = val
+};
+
+method :at => {
+    idx => {
+
+        :put => {
+            val => {
+                me(idx) = val
+            }
+        }
+    }
+};
+
+foo :at 5 :put 5   
+method :execute => { 
+    block => {
+        :onErrorReset => {
+            error => {
+                block :on isFailer :do {
+                    error :execute
+                }
+            }
+        }
+    }
+};
+
+method :or => { funs => {
+    def origPos = self :input;
+
+    funs :do fun => {
+        self :execute { ^fn :call } :onError { self (:input, origPos) }
+    };
+
+    ! self :failer
+} };
+
+
+x => 6
+
+===
+
+x => { 6 }
+
+method :not => fn => {
+    def origPos = self :input;
+
+    self :execute { fn :call } :onError { self (:input, origPos); ^true }
+
+    ! self :failer
+}
+
+method :opt -> fn => {
+    def origPos = self :input;
+
+    self :execute { ^ fn :call } :onError { self (:input, origPos); };
+
+    ^ nil
+}
+
+method :anything => {
+    def answer = self :input :head;
+    self (:input, self :input :tail);
+    ^answer
+};
+
+method :seq => {
+    self :apply :anything :do o => { self :applyWithArgs :exactly o };
+}
+
+method :form => fn => {
+    def list = self :applyWithPred :anything o => { o (:supports, List) });
+    def origInput = self :input;
+
+    self :set :input (BasicLinkedInputStream :fromList list);
+    self (:input, BasicLinkedInputStream :fromList list);
+
+    fn :call;
+    self :apply :end;
+
+    self :set :input origInput;
+    self (:input, origInput);
+
+    ^list
+});
+
+
+method exp = {
+    ^ self :or
+    (
+        {
+            def e = self :apply :exp;
+       
+            self :apply :spaces;
+            self :applyWithArgs :exactly ('+');
+       
+            def n = self :apply :num;
+
+            (:Add, e, n);
+        },
+        {
+            def e = self :apply :exp;
+       
+            self :apply :spaces;
+            self :applyWithArgs :exactly ('-');
+       
+            def n = self :apply :num;
+
+            (:Sub, e, n);        
+        },
+        {
+            self :apply :num
+        }
+    )
+};
+
+method :notx = {
+    self :not { self :applyWithArgs :exactly (:x) }
+};
+
+method :abAndEnd = {
+    self (:applyWithArgs, :exactly, :a);
+    self (:applyWithArgs, :exaclty, :b);
+    self (:apply, :end);
+}
+
+method :hello3AndSomething = {
+    var a;
+
+    self :form {
+        self :applyWithArgs :exactly :hello;
+        self :applyWithArgs :exactly 3;
+
+        self :form {
+            a = self :apply :anything;
+            self :applyWithArgs :exactly 8;
+        }
+    };
+
+    a
+};
+            
+" complexList = (1 (3 5)+:a 7) -> a"
+method :complexList => {
+    var a;
+
+    self :form {
+        self (:applyWithArgs, :exactly, 1);
+
+        a = self :manyOne {
+            self :form {
+                self (:applyWithArgs, :exactly, 3);
+                self (:applyWithArgs, :exactly, 5);
+            }
+        };
+
+        self (:applyWithArgs, :exactly, 7);
+    };
+
+    a
+};
+
+# listOf :p = apply(p):first ("," apply(p))*:result -> { def result = (first); result (:addAll, rest); }
+method :listOf = {
+    def p = self :apply :anything;
+
+    def first = self :apply p;
+    def rest = self :many {
+        self (:applyWithArgs, :token, ';');
+        self :apply p;
+    };
+
+    def result = (first);    
+    result (:addAll, rest);
+};
+
+method :helloWorld = {
+    self (:applyWithArgs, :token, :hello);
+    self (:applyWithArgs, :token, :world);
+};
+
+
+method :fullNameCompute => {
+    self :lastNaself + ", " + (self :firstName)
+}
+
+method :notx => {
+    self :not { self :applyWithArgs :exactly :x };
+    self :apply :anything
+};
+
+method :higherOrder => {
+    def parser = TrialParser :new :fromString "45, 787, 997";
+    self :assertEquals (45, 787, 997) :to (parser :applyWithArgs :listOf :num)
+};
+
+method :complexList => {
+    def parser = TrialParser :new :input (1, (3, 5), (3, 5), 7);
+    self :assertEquals ((3, 5), (3, 5)) :to (parser :apply :complexList)
+};
+
+"finds the next priself number";
+
+var pf = PrimeFinder :from 10;
+
+pf :next :should :be 11;
+
+pf = PrimeFinder :from 25;
+
+pf :next :should :be 29;
+
+
+System :getProperties :get "os.name"
+
+def m = ScriptEngineManager :new;
+def rubyEngine = m :getEngineByName :jruby;
+def contex = rubyEngine :getContext;
+
+context :setAttribute "label" :to 4 :in :scope (ScriptContext :ENGINE_SCOPE);
+
+{ rubyEngine :eval "puts 2 + melabel" :in context } :onEx ex => {
+    ex :printStackTrace
+}
+
+method :expr => {
+    self :or ({
+        def e = self :apply :expr;
+        self :apply :spaces;
+        def t = self :applyWithArgs :exactly "-";
+        def n = self :apply :num;
+
+        ("Expr", e, t, n)
+    }, {
+        self :apply :num
+    })
+};
+
+method :stringToCharList str => {
+    def chars = arrayList :clone;
+    value :toCharArray :do ch => { chars :add ch }
+    chars
+};
+
+method :token => {
+    def t = self :apply :anything;
+    self :apply :spaces;
+    self :applyWithArgs :seq (self :stringToCharList t);
+    self :or ({ self :manyOne :space }, { self :apply :end });
+
+    t
+};
+
+method :chr => {
+    self :applyWithPred :anything o => { o :kind == "character" }
+};
+
+method :sendLiterlSelector0ArgsBytecode => {
+    self :set :messageSelector (self :literal (self :currentBytecode :bitAnd 21));
+    self :set :argumentCount 0;
+
+    def rcvr = self :internalStackValue 0;
+    self :set :lkupClass (self :objectMemory :fetchClassOf rcvr);
+
+    self :commonSend
+};

@@ -1,0 +1,25 @@
+imports: !object
+{
+    "imports",
+    !object
+    {
+        "nativefn", "addInt",
+        "nativefn", "println"
+    }
+}
+
+addInt: 5
+println: 6
+
+main: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+    !var tmp
+    
+    !sendwcc "Hello, World!" !to println
+    !croa [msg, 5] > tmp
+    !sendwcc tmp !to addInt > tmp
+    !sendwcc tmp !to println
+    !cont cont
+}

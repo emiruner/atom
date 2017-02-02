@@ -1,0 +1,87 @@
+method :abAndEnd => {
+    self :applyWithArgs :exactly 'a';
+    self :applyWithArgs :exactly 'b';
+    ^ self :apply :end
+}
+
+method :notx => {
+    self :not {
+        self :applyWithArgs :exactly 'x'
+    };
+
+    self :apply :anything;
+}
+
+method (:apply, ruleName) => {
+    var memoRec = self :input; :memo ruleName;
+
+    memoRes :isNil; :then {
+        def origPos = self :input;
+        def failer = Failer :clone;
+
+        origPos :memo ruleName failer;
+        memRec = origPos :memo ruleName (MemoEntry :new (self :evalRule ruleName) input);
+
+        failer :isUsed; :then {
+            def lastPos = self :input;
+
+            {
+                {
+                    self :set :input origPos;
+
+                    def answer = self :evalRule ruleName;
+
+                    self :input == lastPos; :then {
+                        break;
+                    };
+
+                    memoRec :setAnswer answer;
+                    memoRec :setNextPos (self :input);
+                } :onError ex => {
+                    break;
+                }
+            } :loop;
+
+         } :else {
+            memoRec :isFailer; :then {
+                memoRec :used true;
+                ! ParseFailer :clone;
+            }
+        };
+
+        self :input (memoRec :nextPos);
+        ^ memoRec :getAnswer;
+    };
+}
+
+method (:applyWithPred, ruleName, pred) : {
+    def answer = self :apply ruleName;
+
+    pred :eval answer; :then {
+        ^answer
+    };
+
+    ! self :failer
+}
+
+method (:applyWithPred, ruleName, pred) : {
+    def answer = self :apply ruleName;
+
+    pred <- :eval answer <= :then {
+        ^answer
+    };
+
+    ! self :failer
+}
+
+method (:prependInput, v) : {
+    self :set :input (BasicLinkedInputStream :newWith v (self :input))
+}
+
+method (authenticateWithUserDetails, authentication, userDetails) => {
+    authentication (setAuthorities, userDetails getAuthorities)
+    authentication (setUsername, userDetails getUsername)
+    authentication (setAuthenticated, true)
+
+    authentication
+}

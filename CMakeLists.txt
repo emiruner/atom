@@ -1,0 +1,11 @@
+PROJECT(atom)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+INCLUDE_DIRECTORIES(src)
+
+FILE(GLOB sources src/vm/*.cpp src/os/*.cpp)
+ADD_LIBRARY(atomvm STATIC ${sources})
+TARGET_LINK_LIBRARIES(atomvm dl)
+
+ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(test)

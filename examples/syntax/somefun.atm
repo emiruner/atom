@@ -1,0 +1,181 @@
+def fb = fooBar#(1, 2, 3)     // An object with fooBar as m.o. and 1, 2, 3 as remaining slots.
+
+var x = 343
+
+def notImplementedError = ()
+
+def otherBar = someParam#{
+    console :dumpObject someParam
+
+    installExceptionHandler fb
+    removeExceptionHandler
+    ! notImplementedError
+
+    if1 console instexh fb
+
+    def x = 123;
+    var y = 111;
+
+label:
+    4 + 5;
+    7 + 8;
+    y = x + 3;
+    if1 y goto label;
+};
+
+otherBar 454;
+
+def x = fooBar[4];
+fooBar[5] = x + 1;
+
+fooBar.length
+fooBar.noaa
+fooBar.clone
+
+^554;
+! 4454;
+
+
+def max = a => b => {
+    a > b :then a :else b
+}
+
+def max = elements => {
+
+}
+
+max 30 40
+
+max (3, 5, -1, 8, 3)
+
+56.4433
+45
+
+() -> empty array
+(678,) -> single element array
+(3, 5, otherBar) -> three element array
+'a byte array' 
+
+def main = msg#{
+    def printStringFn = msg[2];
+    def loadLibraryFn = msg[3];
+    def resolveFunctionFn = msg[4];
+
+    printStringFn "Starting main...";
+    def primsLib = createSharedLibrary ("libatomprims.so", loadLibraryFn, resolveFunctionFn);
+    def cstreqFn = primsLib "fn_cstreq";
+
+    def tmp = cstreqFn "xxx" "xxxx";
+    if1 (cstreqFn "xxx" "xxxx") printStringFn "they are equal";
+    if
+};
+
+def createSharedLibrary = msg#{
+
+};
+
+def sharedLibraryMo = msg#{
+    def realTarget = msg[1]
+    def realMsg = msg[2]
+    def libraryHandle = realTarget[1]
+    def resolveFunctionFn = realTarget[2]
+
+    def fn = resolveFunctionFn (libraryHandle, realMsg)
+    if1 fn !"cannot resolve function"
+
+    ^fn
+}
+
+def isIntegerInSet = (needle, haystack) #{
+    def haystackSize = haystack.length
+    var index = 0
+
+nextChar:
+    if1 (eqInt (index, haystackSize)) ^0
+    if1 (eqInt (needle, haystack[index])) ^1
+
+    index = addOne index
+    goto nextChar           
+}
+
+def isParameterFixed = (paramList, paramOffset) => {
+    paramList :do param => {
+        param :offset > paramOffset :then {
+             ^true
+        }
+    }
+
+    ^false
+}
+
+...
+
+method :atLeastOne => predicate => {
+    self :do each => {
+        predicate :eval each :then {
+            ^true
+        }
+    }
+
+    ^false
+}
+
+coll :atLeastOne item => { item :offset > 0 }
+
+def isIntegerInSet2 = (needle, haystack) #{
+    def haystackSize = haystack.length
+    var index = 0
+
+nextChar:
+    if1 (index == haystackSize) ^0
+    if1 (needle == haystack[index] ^1
+
+    index = index + 1
+    goto nextChar           
+}
+
+def isIntegerInSet3 = (needle, haystack) #{
+    haystack :do each => {
+        needle == each :then {^1}
+    }
+
+    ^0
+}
+
+def isIntegerInSet4 = (needle, haystack) #{
+    ^ haystack :contains needle
+}
+
+def isIntegerInSet5 = needle => haystack => {
+    ^ haystack :contains needle
+}
+
+method :fooBar => someParam => {
+    someParam :doSomething
+}
+
+nextChar:
+    if1 (index == haystackSize) ^0
+    if1 (needle == haystack[index] ^1
+
+    index = index + 1
+    goto nextChar           
+}
+
+
+haystack :contains needle
+def isIntegerInSet = function (needle, haystack) => {
+    
+}
+def newlineChars = (10, 13);
+
+def isNewline = msg#{
+    isIntegerInSet (msg, newlineChars)
+}
+
+def someThing = object {
+    field x y
+
+    method :move => x => y {
+    }
+}

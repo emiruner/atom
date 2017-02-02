@@ -1,0 +1,26 @@
+fn2: !simplefn
+{
+    !var:0 cont 
+    !var:1 msg
+    !var:2 length = 123
+    !var:43 test = 12.34
+    !var hello
+    !var something = !objarr {msg, length}
+    
+    !alen msg > foobar
+    !aat msg 5 > zeroth    
+    !croa [fn, 37, cont, !objarr {678  }] > test
+    !send msg !to 872
+    !sendwcc "hello" !to length
+    !sendwcc 3 !to 5 > msg
+    !aput msg 2 "hello"
+    !if1 cont !send 6 !to 7
+    !ifnot1 cont !send 6 !to 7
+    !cont cont
+    !contwith cont 789
+    !storecc > hello
+    !storecc data > foobar
+    !halt
+}
+
+e: 2.71

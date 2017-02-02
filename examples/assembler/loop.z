@@ -1,0 +1,14 @@
+main: !simplefn
+{
+    !var:0 msg
+    !var:1 printCString
+    !var foo
+
+    !aat msg 2 > printCString
+
+loop:
+    !croa ["one", "two", "three"] > foo
+    !send "hello" !to printCString
+    !jmp loop
+}
+

@@ -1,0 +1,38 @@
+main: !simplefn
+{
+    !var:0 cont
+    !var:1 msg
+
+    !var printCString
+    !var loadLib
+    !var resolveFun
+
+    !var primsLib
+    !var readInt
+    !var addOne
+    !var println
+    !var x
+    !var tmp
+
+    !aat msg 2 > printCString
+    !aat msg 3 > loadLib
+    !aat msg 4 > resolveFun
+
+    !sendwcc "libatomprims.so" !to loadLib > primsLib
+    !if1 primsLib !sendwcc "Cannot load prims library." !to printCString
+    !if1 primsLib !cont cont
+
+    !croa [primsLib, "fn_readInt"] > tmp
+    !sendwcc tmp !to resolveFun > readInt
+
+    !croa [primsLib, "fn_addOne"] > tmp
+    !sendwcc tmp !to resolveFun > addOne
+
+    !croa [primsLib, "fn_println"] > tmp
+    !sendwcc tmp !to resolveFun > println
+
+    !sendwcc 1 !to readInt > x
+    !sendwcc x !to addOne > x
+    !sendwcc x !to println
+    !cont cont
+}

@@ -1,0 +1,21 @@
+def console = loader (:moduleRequires, ('implements-interface', 'system-console'));
+
+def point = object {
+    [:public] field x;
+    [:public] field y;
+
+    method (:moveBy, dx, dy) => {
+        self (x, (self x + dx));
+        self (y, (self y + dy));
+    }
+}
+
+def main = args => {
+    def p = point clone (x, 320) (y, 240)
+
+    p (moveBy, 20, 30)
+    p printOn console
+    console (dumpObject, args)
+}
+
+main $ (3, 5);

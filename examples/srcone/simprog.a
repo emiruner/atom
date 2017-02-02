@@ -1,0 +1,10 @@
+"""Find and display line, word, and byte counts."""
+
+def Console = loader (:moduleRequires, 'console-implementation');
+def stdout = Console :stdout.
+
+def main = {
+    stdout :println 'Hello, World!';
+}
+
+

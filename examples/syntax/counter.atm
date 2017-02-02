@@ -1,0 +1,73 @@
+def counter = object {
+    [:public]
+    field value
+
+    [:public]
+    method "incr" => {
+        self (incrBy, 1)
+    }
+
+    [:public]
+    method "reset" => {
+        self (value, 0)
+    }
+
+    [:public]
+    method ("incrBy", n) => {
+        self (value, self value + n)
+    }
+
+    [:public]
+    method ("reachedTo", n) => {
+        ^ self value == n
+    }
+}
+
+counter_method0_body = !simplefn {
+    !var:0 self
+    !var:1 tmp
+
+    !croa ["incrBy", 1] > tmp
+    !send tmp !to self > tmp
+}
+
+counter_method1_body = !simplefn {
+    !var:0 self
+    !var:1 tmp
+
+    !croa ["value", 0] > tmp
+    !send tmp !to self
+}
+
+counter_method2_body = !simplefn {
+    !var:0 msg
+    !var:1 tmp
+    !var self
+    !var n
+    !var value
+
+    !aat msg 0 > self
+    !aat msg 1 > n
+
+    !send "value" !to self > value
+    !croa ["+", n] > tmp
+    !send tmp !to value > tmp
+    
+    !croa ["value, tmp] > tmp
+    !send tmp !to self
+}
+
+counter_method3_body = !simplefn {
+    !var:0 msg
+    !var:1 tmp
+    !var value
+
+    !aat msg 0 > self
+    !aat msg 1 > n
+
+    !send "value" !to self > value
+    !croa ["==", n] > tmp
+    !send tmp !to value > tmp
+
+    !retres tmp
+}

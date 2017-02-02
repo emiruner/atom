@@ -1,0 +1,18 @@
+msg: "hello, world!"
+
+fn: !simplefnraw {b1, 5, foo, count}
+
+coords: !object {fn, 56.333, msg, "what?"}
+
+foo: !object {fn, coords}
+
+count: 45
+
+pi: 3.141592
+
+b1: !bytearr {12, count, 34, 78, 0, 0, 90}
+
+: !object {b1, 88}
+
+
+
